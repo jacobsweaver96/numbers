@@ -1,5 +1,5 @@
 import Partitions from './partitions';
-import partitionsActions from './state/actions';
-import partitionsReducer from './state/reducer';
+import partitionsActions from './actions';
+import partitionsReducer from './reducer';
 
-export default { Partitions, partitionsActions, partitionsReducer };
+export { Partitions, partitionsActions, partitionsReducer };

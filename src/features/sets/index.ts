@@ -1,5 +1,5 @@
 import Sets from './sets';
-import setsActions from './state/actions';
-import setsReducer from './state/reducer';
+import setsActions from './actions';
+import setsReducer from './reducer';
 
-export default { Sets, setsActions, setsReducer };
+export { Sets, setsActions, setsReducer };
