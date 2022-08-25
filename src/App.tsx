@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Node } from 'vis'
-import { Network } from './components';
+import { ModNetwork } from './features/modNetwork';
 import './App.css';
 
 const App = () => {
@@ -13,7 +13,7 @@ const App = () => {
     const nextNodeId = nodeIndex + 1;
     const node: Node = {
         id: nextNodeId,
-        label: `Node ${nextNodeId}`,
+        label: `${nextNodeId}`,
     };
 
     setNodes([node, ...nodes]);
@@ -21,7 +21,7 @@ const App = () => {
   };
 
   const removeNodes = (nodeIds: Array<number>) => {
-    const filteredEdges = edges.filter(edge => !nodeIds.some(id => edge.to != id && edge.from != id));
+    const filteredEdges = edges.filter(edge => !nodeIds.some(id => edge.to == id || edge.from == id));
     setNodes(nodes.filter(node => !nodeIds.some(id => id == node.id)));
     setEdges(filteredEdges);
   };
@@ -48,15 +48,7 @@ const App = () => {
       <div className="App-header">
         <h2>Welcome to React</h2>
       </div>
-      <Network
-        nodes={nodes}
-        edges={edges}
-
-        addNode={addNode}
-        removeNodes={removeNodes}
-        addEdge={addEdge}
-        removeEdges={removeEdges}
-      />
+      <ModNetwork />
     </div>
   );
 }

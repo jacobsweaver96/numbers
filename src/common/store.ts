@@ -1,5 +1,10 @@
-import { configureStore, compose } from '@reduxjs/toolkit';
-import reducer from './reducer';
+import { configureStore, compose, combineReducers } from '@reduxjs/toolkit';
+import Middleware from './middleware';
+import { modReducer } from '../features/modNetwork';
+
+const rootReducer = combineReducers({
+    modState: modReducer,
+});
 
 const preloadedState = {};
 
@@ -11,9 +16,9 @@ const composeEnhancers =
 const enhancers = composeEnhancers();
 
 const configureStoreOptions = {
-    reducer,
+    reducer: rootReducer,
+    middleware: Middleware,
     preloadedState,
-    enhancers,
 };
 
 const store = configureStore(configureStoreOptions);

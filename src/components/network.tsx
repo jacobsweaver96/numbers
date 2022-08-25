@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import { Network as Graph } from 'vis-network';
 import { Node, Edge } from 'vis';
 
@@ -35,21 +35,21 @@ const Network = (props: Props) => {
     };
 
     const removeNodesAndSelection = (nodeIds: Array<number>) => {
-        if (removeNodes) {
-            removeNodes(nodeIds);
-        }
-
         const filteredEdges = edges.filter(edge => !nodeIds.some(id => edge.to != id && edge.from != id));
         setSelectedNodeIds(selectedNodeIds.filter(id => !nodeIds.some(removedId => id == removedId)));
         setSelectedEdgeIds(selectedEdgeIds.filter(id => filteredEdges.some(filteredEdge => id == filteredEdge.id)))
+
+        if (removeNodes) {
+            removeNodes(nodeIds);
+        }
     };
 
     const removeEdgesAndSelection = (edgeIds: Array<number>) => {
+        setSelectedEdgeIds(selectedEdgeIds.filter(id => !edgeIds.some(removedId => id == removedId)));
+
         if (removeEdges) {
             removeEdges(edgeIds);
         }
-
-        setSelectedEdgeIds(selectedEdgeIds.filter(id => !edgeIds.some(removedId => id == removedId)));
     };
 
     const doesEdgeExist = (left: number, right: number) => edges.some(edge => 
@@ -63,19 +63,42 @@ const Network = (props: Props) => {
     useEffect(() => {
         const options = {
             manipulation: {
+                enabled: false,
             },
             interaction: {
                 multiselect: true,
+                dragNodes: false,
             },
         };
 
         const network = visJsRef.current && new Graph(visJsRef.current, { nodes, edges }, options);
         network?.on('selectNode', eventProps => selectNodes(eventProps.nodes));
         network?.on('selectEdge', eventProps => selectEdges(eventProps.edges));
+        network?.on('deselectNode', eventProps => selectNodes(eventProps.nodes));
+        network?.on('deselectEdge', eventProps => selectEdges(eventProps.edges));
+        network?.setSelection({
+            nodes: selectedNodeIds.filter(id => nodes.some(node => id == node.id)),
+            edges: selectedEdgeIds.filter(id => edges.some(edge => id == edge.id)),
+        });
+        var circumference = nodes.length * 50;
+        var radius = circumference / (2 * Math.PI); 
+        network?.on('initRedraw', function () {
+            var ids = nodes.map(node => node.id);
+            var d = 2 * Math.PI / ids.length;
+            ids.forEach(function(id, i) {
+                if (id == undefined) {
+                    return;
+                }
+
+                var x = radius * Math.cos(d * i)
+                var y = radius * Math.sin(d * i)
+                network.moveNode(id, x, y)
+            })
+        })
     }, [visJsRef, nodes, edges]);
 
     return (
-        <div>
+        <div className="Network-container">
             <div ref={visJsRef} />
             <div>
                 <button onClick={_ => addNode ? addNode() : null}>Add Node</button>
