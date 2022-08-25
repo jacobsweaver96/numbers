@@ -4,6 +4,7 @@ import { Node, Edge } from 'vis';
 import Network from '../../components/network';
 import { ModState } from './reducer';
 import { selectModValueAction, generateResiduesAction } from './actions';
+import { getRandomColor } from '../../common/util';
 
 type StateProps = {
     modValue?: number,
@@ -12,8 +13,8 @@ type StateProps = {
 };
 
 type DispatchProps = {
-    generateNetwork: (val: number) => void,
-    generateResidues: () => void,
+    generateNetwork: (val: number, n?: number) => void,
+    generateResidues: (n: number) => void,
 };
 
 type Props = StateProps & DispatchProps;
@@ -21,7 +22,7 @@ type Props = StateProps & DispatchProps;
 const mapStateToProps = (state: { modState: ModState }): StateProps => {
     const {
         modValue,
-        residuesMap,
+        residuesMapSet,
     } = state.modState;
 
     // short-circuit
@@ -45,20 +46,24 @@ const mapStateToProps = (state: { modState: ModState }): StateProps => {
     let edges: Array<Edge> = [];
     let nextEdgeId = 1;
 
-    if (residuesMap)
+    if (residuesMapSet)
     {
-        const residueEdges: Array<Edge> = [];
-        residuesMap.forEach((from, to) => {
-            const edge: Edge = {
-                id: nextEdgeId,
-                from,
-                to,
-            };
-            residueEdges.push(edge);
-            nextEdgeId = nextEdgeId + 1;
-        });
+        residuesMapSet.forEach((residuesMap, n) => {
+            const residueEdges: Array<Edge> = [];
+            const color = getRandomColor();
+            residuesMap.forEach((to, from) => {
+                const edge: Edge = {
+                    id: nextEdgeId,
+                    from,
+                    to,
+                    color, 
+                };
+                residueEdges.push(edge);
+                nextEdgeId = nextEdgeId + 1;
+            });
 
-        edges = edges.concat(residueEdges);
+            edges = edges.concat(residueEdges);
+        })
     }
 
     return { modValue, nodes, edges };
@@ -67,14 +72,14 @@ const mapStateToProps = (state: { modState: ModState }): StateProps => {
 const mapDispatchToProps = dispatch => {
     return {
         generateNetwork: (val: number | undefined) => val ? dispatch(selectModValueAction(val)) : undefined,
-        generateResidues: (val: number | undefined) => val ? dispatch(generateResiduesAction(val)) : undefined,
+        generateResidues: (val: number | undefined, n: number) => val ? dispatch(generateResiduesAction(val, n)) : undefined,
     };
 };
 
 const mergeProps = (stateProps, dispatchProps, ownProps): Props => {
     return {
         generateNetwork: dispatchProps.generateNetwork,
-        generateResidues: () => dispatchProps.generateResidues(stateProps.modValue),
+        generateResidues: (n: number) => dispatchProps.generateResidues(stateProps.modValue, n),
         ...ownProps,
         ...stateProps,
     };
@@ -91,6 +96,7 @@ const ModNetwork = (props: Props) => {
     } = props;
 
     const [inputModValue, setInputModValue] = useState<number | undefined>(modValue);
+    const [inputResidueValue, setInputResidueValue] = useState<number>(2);
 
     return (
         <div>
@@ -107,7 +113,17 @@ const ModNetwork = (props: Props) => {
                 onChange={event => setInputModValue(parseInt(event.currentTarget.value))}
             />
             <button disabled={!inputModValue} onClick={() => inputModValue ? generateNetwork(inputModValue) : null}>Generate</button>
-            <button disabled={!modValue || (modValue != inputModValue)} onClick={generateResidues}>Generate Residues</button>
+            <br />
+            <label>Nth Residue:</label>
+            <input
+                type="number"
+                id="value"
+                name="value"
+                value={inputResidueValue}
+                onChange={event => setInputResidueValue(parseInt(event.currentTarget.value))}
+                min={1}
+            />
+            <button disabled={!modValue || (modValue != inputModValue)} onClick={() => generateResidues(inputResidueValue)}>Generate Residues</button>
         </div>
     );
 }

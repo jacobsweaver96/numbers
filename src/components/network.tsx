@@ -1,10 +1,11 @@
-import React, { RefObject, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Network as Graph } from 'vis-network';
 import { Node, Edge } from 'vis';
 
 type Props = {
     nodes: Array<Node>,
     edges: Array<Edge>,
+    showNodeControls?: boolean,
 
     addNode?: () => void,
     removeNodes?: (nodeIds: Array<number>) => void,
@@ -16,6 +17,7 @@ const Network = (props: Props) => {
     const {
         nodes,
         edges,
+        showNodeControls,
 
         addNode,
         removeNodes,
@@ -100,7 +102,7 @@ const Network = (props: Props) => {
     return (
         <div className="Network-container">
             <div ref={visJsRef} />
-            <div>
+            <div hidden={!showNodeControls}>
                 <button onClick={_ => addNode ? addNode() : null}>Add Node</button>
                 <button onClick={_ => removeNodesAndSelection(selectedNodeIds)} disabled={selectedNodeIds.length == 0}>Remove Node(s)</button>
                 <button onClick={_ => addEdge ? addEdge(selectedNodeIds[0], selectedNodeIds[1]) : null} disabled={canAddEdge}>Add Edge</button>

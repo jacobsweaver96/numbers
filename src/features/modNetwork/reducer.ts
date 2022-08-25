@@ -2,7 +2,7 @@ import { SELECT_MOD, SET_RESIDUES } from "./actions";
 
 type ModState = {
     modValue?: number,
-    residuesMap?: Map<number,number>,
+    residuesMapSet?: Map<number, Map<number,number>>,
 };
 
 const initialState: ModState = {};
@@ -14,9 +14,11 @@ const reducer = (state = initialState, action): ModState => {
                 modValue: action.payload,
             };
         case SET_RESIDUES:
+            const residuesMapSet = state.residuesMapSet ?? new Map<number, Map<number,number>>();
+            residuesMapSet.set(action.payload.n, action.payload.residuesMap)
             return {
                 ...state,
-                residuesMap: action.payload,
+                residuesMapSet: residuesMapSet,
             };
         default:
             return state;

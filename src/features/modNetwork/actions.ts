@@ -8,14 +8,17 @@ const selectModValueAction = (value: number) => ({
     payload: value,
 });
 
-const setResiduesAction = (residuesMap: Map<number,number>) => ({
+const setResiduesAction = (n: number, residuesMap: Map<number,number>) => ({
     type: SET_RESIDUES,
-    payload: residuesMap,
+    payload: {
+        n,
+        residuesMap,
+    },
 });
 
-const generateResiduesAction = (value: number) => async (dispatch, getState, numberApi: NumberApi) => {
-    const residues = numberApi.getResidues(value);
-    dispatch(setResiduesAction(residues));
+const generateResiduesAction = (value: number, n: number) => async (dispatch, getState, numberApi: NumberApi) => {
+    const residues = numberApi.getResidues(value, n);
+    dispatch(setResiduesAction(n, residues));
 };
 
 export {
